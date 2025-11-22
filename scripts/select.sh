@@ -44,10 +44,22 @@ function run_menu()
 		case "$input"
 		in
 			$'\x1B')  # ESC ASCII code (https://dirask.com/posts/ASCII-Table-pJ3Y0j)
-				read -rsn1 -t 0.1 input
+				# macOS uses an older bash version that doesn't support float timeout
+				# note: may be better to go by BASH_VERSION instead
+				if [[ "$OSTYPE" == "darwin"* ]]; then
+					read -rsn1 -t 1 input
+				else
+					read -rsn1 -t 0.1 input
+				fi
+
 				if [ "$input" = "[" ]  # occurs before arrow code
 				then
-					read -rsn1 -t 0.1 input
+					if [[ "$OSTYPE" == "darwin"* ]]; then
+						read -rsn1 -t 1 input
+					else
+						read -rsn1 -t 0.1 input
+					fi
+
 					case "$input"
 					in
 						A)  # Up Arrow
@@ -68,7 +80,13 @@ function run_menu()
 							;;
 					esac
 				fi
-				read -rsn5 -t 0.1  # flushing stdin
+
+				# flushing stdin
+				if [[ "$OSTYPE" == "darwin"* ]]; then
+					read -rsn5 -t 1 input
+				else
+					read -rsn5 -t 0.1 input
+				fi
 				;;
 			"")  # Enter key
 				return "$selected_item"
